@@ -1,7 +1,7 @@
 def read_input_data(filename):
   neighborhoods, home_buyers = [], []
 
-  with open(filename, 'r') as file:
+  with open(filename) as file:
     for line_number, line in enumerate(file, 1):
       parts = line.split()
       if not parts:
@@ -54,5 +54,5 @@ def calculate_buyer_scores(neighborhoods, home_buyers):
     # Sort buyers by their scores in each neighborhood in descending order
     buyers_scores[buyer['H']] = sorted(current_scores, key=lambda item: item['score'], reverse=True)
     buyers_scores[buyer['H']].append(buyer['prefs'])
-    
+
   return buyers_scores

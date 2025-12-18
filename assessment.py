@@ -1,5 +1,6 @@
 from collections import deque
-from helpers import read_input_data, calculate_buyer_scores, write_output_data
+
+from helpers import calculate_buyer_scores, read_input_data, write_output_data
 
 
 class Pearl:
