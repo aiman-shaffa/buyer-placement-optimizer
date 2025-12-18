@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+coverage/
+htmlcov/
+build/
+dist/
+*.egg-info/
+
+# Environments
+.venv/
+venv/
+project_venv/
+node_modules/
+.env
+.env.*
+!.env.example
+
+# Logs, scratch and OS files
+*.log
+logs/
+tmp/
+.DS_Store
+.idea/
+.vscode/
+.github/
