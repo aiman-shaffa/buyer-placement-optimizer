@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from assessment import Pearl
+from solver import PlacementSolver
 
 HERE = Path(__file__).parent
 
@@ -19,7 +19,7 @@ def solve(tmp_path):
     def run(lines):
         path = tmp_path / 'input.txt'
         path.write_text('\n'.join(lines), encoding='utf-8')
-        solver = Pearl(path)
+        solver = PlacementSolver.from_file(path)
         solver.optimize_placements()
         return solver
     return run
@@ -38,7 +38,7 @@ def assert_invariants(solver):
         for preferred in buyer['prefs'][:buyer['prefs'].index(placement[name])]:
             residents = solver.final_selections[preferred]
             assert len(residents) == solver.capacities[preferred]
-            score = next(item['score'] for item in solver.buyers_scores[name][:-1] if item['neighborhood'] == preferred)
+            score = solver.scores[name][preferred]
             assert all(score <= resident_score for _, resident_score in residents)
 
 
@@ -108,7 +108,7 @@ def test_writing_output_leaves_placements_untouched(solve, tmp_path):
 
 
 def test_bundled_fixture_reproduces_generated_output(tmp_path):
-    solver = Pearl(HERE / 'input.txt')
+    solver = PlacementSolver.from_file(HERE / 'input.txt')
     solver.optimize_placements()
     assert_invariants(solver)
     result = tmp_path / 'output.txt'

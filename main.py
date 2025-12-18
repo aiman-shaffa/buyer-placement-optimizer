@@ -1,7 +1,7 @@
 import argparse
 from pathlib import Path
 
-from assessment import Pearl
+from solver import PlacementSolver
 
 
 def main():
@@ -10,9 +10,9 @@ def main():
     parser.add_argument('output', nargs='?', default='generated_output.txt')
     args = parser.parse_args()
     try:
-        assessment = Pearl(args.input)
-        assessment.optimize_placements()
-        assessment.generate_output(args.output)
+        solver = PlacementSolver.from_file(args.input)
+        solver.optimize_placements()
+        solver.generate_output(args.output)
     except (OSError, ValueError) as error:
         parser.exit(1, f'Error: {error}\n')
 
