@@ -1,8 +1,10 @@
+import io
 import random
 from pathlib import Path
 
 import pytest
 
+from main import main
 from solver import PlacementSolver
 
 HERE = Path(__file__).parent
@@ -114,3 +116,25 @@ def test_bundled_fixture_reproduces_generated_output(tmp_path):
     result = tmp_path / 'output.txt'
     solver.generate_output(result)
     assert result.read_text() == (HERE / 'generated_output.txt').read_text()
+
+
+def test_cli_prints_bundled_placements_by_default(capsys, monkeypatch, tmp_path):
+    monkeypatch.chdir(tmp_path)
+    main([])
+    assert capsys.readouterr().out == (HERE / 'generated_output.txt').read_text()
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_cli_reads_stdin_and_writes_file(monkeypatch, tmp_path):
+    monkeypatch.setattr('sys.stdin', io.StringIO('N N0 E:1 W:1 R:1\nH H0 E:2 W:0 R:1 N0\n'))
+    main(['-', str(tmp_path / 'out.txt')])
+    assert (tmp_path / 'out.txt').read_text() == 'N0: H0(3)\n'
+
+
+def test_cli_reports_bad_input_and_exits_1(capsys, tmp_path):
+    bad = tmp_path / 'bad.txt'
+    bad.write_text('N N0 E:x W:1 R:1\n')
+    with pytest.raises(SystemExit) as exit_info:
+        main([str(bad)])
+    assert exit_info.value.code == 1
+    assert capsys.readouterr().err == "Error: E must be an integer on line 1, got 'x'\n"
