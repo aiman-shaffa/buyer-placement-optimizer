@@ -8,8 +8,12 @@ class Pearl:
         self.neighborhoods, self.home_buyers = read_input_data(input_file)
         names = [n['N'] for n in self.neighborhoods]
         buyers = [b['H'] for b in self.home_buyers]
-        if not names or len(set(names)) != len(names) or len(set(buyers)) != len(buyers):
-            raise ValueError('Require unique neighborhoods and unique buyers')
+        if not names:
+            raise ValueError('Input defines no neighborhoods')
+        if len(set(names)) != len(names):
+            raise ValueError('Neighborhood names must be unique')
+        if len(set(buyers)) != len(buyers):
+            raise ValueError('Buyer names must be unique')
         for buyer in self.home_buyers:
             if len(buyer['prefs']) != len(names) or set(buyer['prefs']) != set(names):
                 raise ValueError('Each buyer must rank every neighborhood exactly once')

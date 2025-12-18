@@ -1,22 +1,15 @@
 def read_input_data(filename):
   neighborhoods, home_buyers = [], []
 
-  with open(filename) as file:
+  with open(filename, encoding='utf-8') as file:
     for line_number, line in enumerate(file, 1):
       parts = line.split()
       if not parts:
         continue
       if parts[0] not in ('N', 'H') or len(parts) != (5 if parts[0] == 'N' else 6):
         raise ValueError(f'Invalid record on line {line_number}')
-      data_dict = {}
-
-      data_dict[parts[0]] = parts[1]
-
-      if {val.split(':')[0] for val in parts[2:5]} != {'E', 'W', 'R'}:
-        raise ValueError(f'Expected E, W, R on line {line_number}')
-      for val in parts[2:5]:
-        key, value = val.split(':')
-        data_dict[key] = int(value)
+      data_dict = {parts[0]: parts[1]}
+      data_dict.update(parse_attributes(parts[2:5], line_number))
 
       if parts[0] == 'N':
         neighborhoods.append(data_dict)
@@ -26,6 +19,18 @@ def read_input_data(filename):
         home_buyers.append(data_dict)
 
   return neighborhoods, home_buyers
+
+def parse_attributes(tokens, line_number):
+  values = {}
+  for token in tokens:
+    key, separator, value = token.partition(':')
+    if not separator or key not in ('E', 'W', 'R') or key in values:
+      raise ValueError(f'Expected one each of E, W, R on line {line_number}, got {token!r}')
+    try:
+      values[key] = int(value)
+    except ValueError:
+      raise ValueError(f'{key} must be an integer on line {line_number}, got {value!r}') from None
+  return values
 
 def write_output_data(filename, selections):
   with open(filename, 'w') as file:

@@ -18,7 +18,7 @@ REGRESSION = [
 def solve(tmp_path):
     def run(lines):
         path = tmp_path / 'input.txt'
-        path.write_text('\n'.join(lines))
+        path.write_text('\n'.join(lines), encoding='utf-8')
         solver = Pearl(path)
         solver.optimize_placements()
         return solver
@@ -60,16 +60,28 @@ def test_balanced_complete_stable_results(solve, buyer_count):
     assert first == solver.final_selections
 
 
-@pytest.mark.parametrize('lines', [
-    [],
-    ['N N0 E:1 W:1 R:1'] * 2,
-    ['N N0 E:1 W:1 R:1', 'H H0 E:1 W:1 R:1 N9'],
-    ['bad'],
-    ['N N0 E:1 E:2 R:1'],
+@pytest.mark.parametrize(('lines', 'message'), [
+    ([], 'no neighborhoods'),
+    (['H H0 E:1 W:1 R:1 N0'], 'no neighborhoods'),
+    (['N N0 E:1 W:1 R:1'] * 2, 'Neighborhood names must be unique'),
+    (['N N0 E:1 W:1 R:1', 'H H0 E:1 W:1 R:1 N0', 'H H0 E:2 W:2 R:2 N0'], 'Buyer names must be unique'),
+    (['N N0 E:1 W:1 R:1', 'H H0 E:1 W:1 R:1 N9'], 'rank every neighborhood'),
+    (['N N0 E:1 W:1 R:1', 'N N1 E:1 W:1 R:1', 'H H0 E:1 W:1 R:1 N0>N0'], 'rank every neighborhood'),
+    (['bad'], 'Invalid record on line 1'),
+    (['N N0 E:1 E:2 R:1'], 'E, W, R on line 1'),
+    (['N N0 E1 W:1 R:1'], 'E, W, R on line 1'),
+    (['N N0 E:1 W:1 R:1', 'N N1 E:1:2 W:1 R:1'], 'E must be an integer on line 2'),
+    (['N N0 E:1.5 W:1 R:1'], 'E must be an integer on line 1'),
+    (['N N0 E:1 W: R:1'], 'W must be an integer on line 1'),
 ])
-def test_invalid_inputs_are_rejected(solve, lines):
-    with pytest.raises(ValueError):
+def test_invalid_inputs_are_rejected(solve, lines, message):
+    with pytest.raises(ValueError, match=message):
         solve(lines)
+
+
+def test_input_is_read_as_utf8(solve):
+    solver = solve(['N Café E:1 W:1 R:1', 'H Zoë E:1 W:1 R:1 Café'])
+    assert solver.final_selections == {'Café': [('Zoë', 3)]}
 
 
 def test_equal_scores_favor_earlier_buyer(solve):
