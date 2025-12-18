@@ -33,12 +33,10 @@ def parse_attributes(tokens, line_number):
   return values
 
 def write_output_data(filename, selections):
-  with open(filename, 'w') as file:
+  with open(filename, 'w', encoding='utf-8') as file:
     for neighborhood, assigned_buyers in selections.items():
-      assigned_buyers.sort(key=lambda x: x[1], reverse=True)
-
-      # Write output data to file in expected format
-      file.write(f"{neighborhood}: {' '.join([f'{h}({s})' for h, s in assigned_buyers])}\n")
+      ranked = sorted(assigned_buyers, key=lambda x: x[1], reverse=True)
+      file.write(' '.join([f'{neighborhood}:', *(f'{h}({s})' for h, s in ranked)]) + '\n')
 
 def calculate_buyer_scores(neighborhoods, home_buyers):
   """

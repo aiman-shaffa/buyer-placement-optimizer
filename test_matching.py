@@ -90,6 +90,23 @@ def test_equal_scores_favor_earlier_buyer(solve):
     assert solver.final_selections == {'N0': [('B', 3)], 'N1': [('A', 3)]}
 
 
+def test_empty_neighborhood_line_has_no_trailing_space(solve, tmp_path):
+    solver = solve(['N N0 E:1 W:1 R:1', 'N N1 E:2 W:2 R:2', 'N N2 E:1 W:1 R:1',
+                    'H H0 E:1 W:1 R:1 N0>N1>N2'])
+    result = tmp_path / 'output.txt'
+    solver.generate_output(result)
+    assert result.read_text() == 'N0: H0(3)\nN1:\nN2:\n'
+
+
+def test_writing_output_leaves_placements_untouched(solve, tmp_path):
+    solver = solve(['N N0 E:1 W:1 R:1', 'H low E:1 W:1 R:1 N0'])
+    solver.final_selections['N0'].append(('high', 99))
+    before = {key: list(value) for key, value in solver.final_selections.items()}
+    solver.generate_output(tmp_path / 'output.txt')
+    assert solver.final_selections == before
+    assert (tmp_path / 'output.txt').read_text() == 'N0: high(99) low(3)\n'
+
+
 def test_bundled_fixture_reproduces_generated_output(tmp_path):
     solver = Pearl(HERE / 'input.txt')
     solver.optimize_placements()
